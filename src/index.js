@@ -10,7 +10,7 @@ const { join } = require('path');
 app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(join(__dirname, '..', 'views', 'css')));
+app.use(express.static(join(__dirname, '..', 'views', 'static')));
 
 app.get('/', (req, res) => res.render('pages/main'));
 
@@ -25,7 +25,7 @@ app.post('/register', async (req, res) => {
             { key: value },
             { $setOnInsert: { 
                 key: value, 
-                data: { html: '' } 
+                data: { html: [] } 
             } },
             { returnOriginal: false, upsert: true }
         ); // find existing paste of create a new one.
@@ -42,7 +42,7 @@ app.get('/pad/:name', async (req, res) => {
         const client = await connect.connect();
         const db = client.db('pastes').collection('keys');
 
-        const result = await db.findOne({ key: req.params.name });
+        const result = await db.findOne({ key: encodeURIComponent(req.params.name) });
         if(!result) return res.redirect('/error', 404);
 
         return res.render('pages/pad', { html: result.data.html });
@@ -56,9 +56,13 @@ app.post('/save', async (req, res) => {
         const client = await connect.connect();
         const db = client.db('pastes').collection('keys');
 
+        for(const o of req.body.html) {
+            if(o.insert) o.insert = encodeURIComponent(o.insert);
+        }
+
         const result = await db.updateOne(
             { key: encodeURIComponent(req.body.key) },
-            { $set: { data: { html: encodeURIComponent(req.body.html) } }}
+            { $set: { data: { html: req.body.html } }}
         );
 
         if(!result) return res.send({ fail: 'No document found to update. (code 3)' });

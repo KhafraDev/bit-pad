@@ -2,30 +2,32 @@
 <html lang="en">
     <head>
         <%- include("../partials/head") %>
-        <link href="/pad.css" rel="stylesheet" type="text/css">
+        <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+        <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+        <link href="/css/pad.css" rel="stylesheet" type="text/css">
+        <script src="/js/format.js"></script>
     </head>
     <header>
         <nav class="navbar navbar-light bg-light">
             <a class="navbar-brand">
               <img src="https://i.imgur.com/btyW0xA.png" width="30" height="30" alt="">
             </a>
-            <div class="btn-group mr-2" role="group" aria-label="First group">
-                <button class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
-                <button class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
-                <button class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
+            <div class="btn-group mr-2" role="group">
                 <button id="save" class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
             </div>
         </nav>
     </header>
     <body class="container">
         <main>
-            <p id="hidden" style="display: none;"><%= html %></p>
-            <textarea name="magicBox" oninput="autoheight(this)"></textarea>
+            <p id="hidden" style="display: none;"><%= JSON.stringify(html) %></p>
+            <div id="khafraEditor"></div>
+            <!-- <textarea name="magicBox" oninput="format(this)"></textarea> -->
             <div class="modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Changes Saved</h5>
+                            <h5 class="modal-title">Nothing to report!</h5>
                             <p id="errorMessage"></p>
                         </div>
                     </div>
@@ -34,45 +36,30 @@
 
         </main>
         <script>
-            // this is forced because ejs doesn't work correctly
+            var quill = new Quill('#khafraEditor', {
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, false] }],
+                        ['bold', 'italic', 'underline'],
+                        ['image', 'code-block']
+                    ]
+                },
+                placeholder: '',
+                theme: 'snow'
+            });
+
             window.onload = function() {
-                const v = document.getElementById('hidden').textContent;
-                document.querySelector('textarea[name="magicBox"]').value = decodeURIComponent(v);
-            }
+                const html = document.getElementById('hidden').textContent;
+                const temp = JSON.parse(html);
 
-            function autoheight(e) {
-                e.style.height = '5px';
-                e.style.height = e.scrollHeight + 'px';
-            }
-
-            function showModal(t, d) {
-                document.querySelector('.modal-title').textContent = t;
-                if(d) {
-                    document.getElementById('errorMessage').textContent = d;
+                for(const o of temp) {
+                    if(o.insert) o.insert = decodeURIComponent(o.insert);
                 }
-                $('.modal').modal();
+                
+                quill.setContents(temp);
             }
 
-            document.getElementById('save').onclick = function() {
-                const value = document.querySelector('textarea[name="magicBox"]');
-                if(!value) return showModal('An error occured.', 'No textarea found!');
-                if(!value.value) return showModal('An error occured.', 'Nothing found to save');
-                if(typeof window.location.href.split('/pad/')[1] === 'undefined') return showModal('An error occured!', 'Key not found');
-
-                $.post({
-                    url: '../save',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    data: JSON.stringify({ "key": window.location.href.split('/pad/')[1], "html": value.value })
-                }).done(function(data) {
-                    if(data && data.success) {
-                        showModal('Changes Saved');
-                    } else {
-                        showModal('An error occured!', data.fail);
-                    }
-                });
-            }
+            document.getElementById('save').onclick = function() { save(quill); };
         </script>
 
         <footer>
