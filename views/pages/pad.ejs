@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head") %>
+        <link href="/pad.css" rel="stylesheet" type="text/css">
+    </head>
+    <header>
+        <nav class="navbar navbar-light bg-light">
+            <a class="navbar-brand">
+              <img src="https://i.imgur.com/btyW0xA.png" width="30" height="30" alt="">
+            </a>
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+                <button class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
+                <button class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
+                <button class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
+                <button id="save" class="btn btn-secondary"><img src="https://i.imgur.com/dOJLrHD.png"></img></button>
+            </div>
+        </nav>
+    </header>
+    <body class="container">
+        <main>
+            <p id="hidden" style="display: none;"><%= html %></p>
+            <textarea name="magicBox" oninput="autoheight(this)"></textarea>
+            <div class="modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Changes Saved</h5>
+                            <p id="errorMessage"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        <script>
+            // this is forced because ejs doesn't work correctly
+            window.onload = function() {
+                const v = document.getElementById('hidden').textContent;
+                document.querySelector('textarea[name="magicBox"]').value = decodeURIComponent(v);
+            }
+
+            function autoheight(e) {
+                e.style.height = '5px';
+                e.style.height = e.scrollHeight + 'px';
+            }
+
+            function showModal(t, d) {
+                document.querySelector('.modal-title').textContent = t;
+                if(d) {
+                    document.getElementById('errorMessage').textContent = d;
+                }
+                $('.modal').modal();
+            }
+
+            document.getElementById('save').onclick = function() {
+                const value = document.querySelector('textarea[name="magicBox"]');
+                if(!value) return showModal('An error occured.', 'No textarea found!');
+                if(!value.value) return showModal('An error occured.', 'Nothing found to save');
+                if(typeof window.location.href.split('/pad/')[1] === 'undefined') return showModal('An error occured!', 'Key not found');
+
+                $.post({
+                    url: '../save',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify({ "key": window.location.href.split('/pad/')[1], "html": value.value })
+                }).done(function(data) {
+                    if(data && data.success) {
+                        showModal('Changes Saved');
+                    } else {
+                        showModal('An error occured!', data.fail);
+                    }
+                });
+            }
+        </script>
+
+        <footer>
+            <%- include("../partials/footer") %>
+        </footer>
+    </body>
+</html>

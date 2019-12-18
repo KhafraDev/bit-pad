@@ -1,0 +1,22 @@
+button {
+    position:relative;
+    width:30px;
+    height:30px;
+}
+
+button img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+}
+
+textarea[name="magicBox"] {
+    resize: none;
+    width: 100%;
+    min-height: 90vh;
+}
