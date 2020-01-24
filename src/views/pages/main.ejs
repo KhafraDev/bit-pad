@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head") %>
+    </head>
+    <header>
+        <%- include("../partials/header") %>
+    </header>
+    <body class="container">
+        <main>
+            <div class="jumbotron">
+                <h1>Bit-Pad</h1>
+                <p>Welcome to Bit-Pad</p>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon3">https://khafra.club/pad/</span>
+                    </div>
+                    <input type="text" class="form-control" id="inputCreate" aria-describedby="basic-addon3">
+                    <button class="btn btn-outline-secondary" type="button" id="create">Create</button>
+                </div>
+            </div>
+        </main>
+
+        <script type="application/javascript">
+            document.getElementById('create').onclick = function() { 
+                const value = document.getElementById('inputCreate').value;
+                if(!value.length) return;
+                if(typeof fetch === 'undefined' || typeof Promise === 'undefined') return;
+
+                return fetch('register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: value })
+                }).then(r => {
+                    if(r.status === 200) {
+                        return r.json();
+                    } else {
+                        return null;
+                    }
+                }).then(data => {
+                    if(data && data.pad) {
+                        window.location.href = data.pad;
+                    } else {
+                        window.location.href = '/error';
+                    }
+                });
+            };
+        </script>
+
+        <footer>
+            <%- include("../partials/footer") %>
+        </footer>
+    </body>
+</html>
