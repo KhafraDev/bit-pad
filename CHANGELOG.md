@@ -18,3 +18,9 @@
 * Fixed errors with encoding pad names that would cause them to not get saved correctly.
 * Save pads as strings rather than an array of objects.
 * Fixed an error on the error URL (ironic).
+
+# v1.1.5
+* Replaced local resources with CDNs; if other services use Quill or Bootstrap from the respective CND, it will be already cached when loaded.
+* Replaced references to my own server with the server currently running Bit-Pad.
+* Added in meta tags so it can be embedded into Discord/Twitter, etc. - WIP
+* Better error "handling" to notify the user when an error occurs, instead of doing nothing.

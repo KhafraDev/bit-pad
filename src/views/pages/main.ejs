@@ -13,7 +13,7 @@
                 <p>Welcome to Bit-Pad</p>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon3">https://khafra.club/pad/</span>
+                        <span class="input-group-text" id="basic-addon3"></span>
                     </div>
                     <input type="text" class="form-control" id="inputCreate" aria-describedby="basic-addon3">
                     <button class="btn btn-outline-secondary" type="button" id="create">Create</button>
@@ -22,10 +22,17 @@
         </main>
 
         <script type="application/javascript">
+            window.onload = function() {
+                document.querySelector('.input-group-text').textContent = 
+                    window.location.protocol + '//' + window.location.host + '/pad/';
+            }
+
             document.getElementById('create').onclick = function() { 
                 const value = document.getElementById('inputCreate').value;
-                if(!value.length) return;
-                if(typeof fetch === 'undefined' || typeof Promise === 'undefined') return;
+                if( !value.length || 
+                    typeof fetch === 'undefined' || 
+                    typeof Promise === 'undefined'
+                ) return window.location.href = '/error';
 
                 return fetch('register', {
                     method: 'POST',
@@ -33,19 +40,9 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ name: value })
-                }).then(r => {
-                    if(r.status === 200) {
-                        return r.json();
-                    } else {
-                        return null;
-                    }
-                }).then(data => {
-                    if(data && data.pad) {
-                        window.location.href = data.pad;
-                    } else {
-                        window.location.href = '/error';
-                    }
-                });
+                })
+                    .then(r => r.status === 200 ? r.json() : null)
+                    .then(data => window.location.href = data && data.pad ? data.pad : '/error');
             };
         </script>
 
