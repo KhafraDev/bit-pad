@@ -19,6 +19,8 @@ app.get('/', (req, res) => res.status(200).render('pages/main'));
 app.post('/register', async (req, res) => {
     if(typeof req.body === 'undefined' || typeof req.body.name === 'undefined') {
         return res.status(404).send(null);
+    } else if(['$', '.'].some(a => req.body.name.indexOf(a) > -1)) {
+        return res.status(404).send(null);
     }
 
     try {
