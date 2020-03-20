@@ -1,31 +1,30 @@
-const express = require('express');
-const app = express();
+const app = require('express')();
 const bodyParser = require('body-parser');
 
-const { Connect } = require('./src/lib/Connect');
-const connect = new Connect();
+const Connect = require('./src/lib/Connect');
 
 const { join } = require('path');
 
 app.set('view engine', 'ejs');
 app.set('views', join(__dirname, 'src', 'views'));
 
-app.use(express.static(join(__dirname, 'node_modules', 'quill', 'dist')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({
+    limit: '5mb'
+}));
+app.use(bodyParser.urlencoded({ 
+    extended: true, 
+    limit: '5mb' 
+}));
 
-app.get('/', (req, res) => res.status(200).render('pages/main'));
+app.get('/', (_, res) => res.status(200).render('pages/main'));
 
 app.post('/register', async (req, res) => {
     if(typeof req.body === 'undefined' || typeof req.body.name === 'undefined') {
         return res.status(404).send(null);
-    } else if(['$', '.'].some(a => req.body.name.indexOf(a) > -1)) {
-        return res.status(404).send(null);
     }
 
     try {
-        const client = await connect.connect();
-        const db = client.db('pastes').collection('keys');
+        const db = (await Connect()).db('pastes').collection('keys');
 
         const result = await db.findOneAndUpdate(
             { key: encodeURIComponent(req.body.name) },
@@ -43,13 +42,12 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/pad/:name', async (req, res) => {
-    if(!req.params.name.length) {
+    if(!req.params || !req.params.name || !req.params.name.length) {
         return res.status(400).redirect('/error');
     }
 
     try {
-        const client = await connect.connect();
-        const db = client.db('pastes').collection('keys');
+        const db = (await Connect()).db('pastes').collection('keys');
 
         const result = await db.findOne({ key: encodeURIComponent(req.params.name) });
         if(!result) return res.redirect('/error');
@@ -61,19 +59,15 @@ app.get('/pad/:name', async (req, res) => {
 });
 
 app.post('/save', async (req, res) => {
-    if(Buffer.byteLength(JSON.stringify(req.body)) > 100000) // 100kb
-        return res.status(400).send({ fail: 'Body size is too large!' });
     if(typeof req.body === 'undefined' || typeof req.body.html === 'undefined' || typeof req.body.key === 'undefined')
         return res.status(400).send({ fail: 'One or more parameters missing or null.' });
 
     try {
-        const client = await connect.connect();
-        const db = client.db('pastes').collection('keys');
-        const html = JSON.stringify(req.body.html);
+        const db = (await Connect()).db('pastes').collection('keys');
 
         const result = await db.updateOne(
             { key: req.body.key },
-            { $set: { data: html } }
+            { $set: { data: JSON.stringify(req.body.html) } }
         );
 
         if(!result) {
@@ -85,14 +79,14 @@ app.post('/save', async (req, res) => {
         return res.status(200).send({ success: true });
     } catch(err) {
         if(err.type === 'entity.too.large') {
-            return res.status(400).send({ fail: 'Document too large.' });
+            return res.status(400).send({ fail: 'Document too large (max: 5mb).' });
         }
         
         return res.status(400).send({ fail: 'An unexpected error occured!\n' + err.message });
     }
 });
 
-app.get('/error', (req, res) => res.status(302).render('pages/error'));
-app.get('*', (req, res) => res.status(302).redirect('/error'));
+app.get('/error', (_, res) => res.status(302).render('pages/error'));
+app.get('*', (_, res) => res.status(302).redirect('/error'));
 
 app.listen(3000, () => console.log('Listening on port 3000!'));

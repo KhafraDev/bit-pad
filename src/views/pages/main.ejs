@@ -22,16 +22,16 @@
         </main>
 
         <script type="application/javascript">
-            window.onload = function() {
+            window.addEventListener('load', function() {
                 document.querySelector('.input-group-text').textContent = 
                     window.location.protocol + '//' + window.location.host + '/pad/';
-            }
+            });
 
-            document.getElementById('create').onclick = function() { 
+            document.getElementById('create').addEventListener('click', function() { 
                 const value = document.getElementById('inputCreate').value;
                 if( !value.length || 
-                    typeof fetch === 'undefined' || 
-                    typeof Promise === 'undefined'
+                    !('fetch' in window) ||
+                    !('Promise' in window)
                 ) return window.location.href = '/error';
 
                 return fetch('register', {
@@ -41,9 +41,11 @@
                     },
                     body: JSON.stringify({ name: value })
                 })
-                    .then(r => r.status === 200 ? r.json() : null)
-                    .then(data => window.location.href = data && data.pad ? data.pad : '/error');
-            };
+                .then(function(r) { 
+                    return r.status === 200 ? r.json() : null })
+                .then(function(data) {
+                    return window.location.href = data && data.pad ? data.pad : '/error' });
+            });
         </script>
 
         <footer>

@@ -24,3 +24,10 @@
 * Replaced references to my own server with the server currently running Bit-Pad.
 * Added in meta tags so it can be embedded into Discord/Twitter, etc. - WIP
 * Better error "handling" to notify the user when an error occurs, instead of doing nothing.
+
+# v1.1.6
+* Remove "patch" that disallowed $ or . to be included in the paste name.
+* Upped the limit of data allowed in body-parser from 100kb max to 5mb.
+* Cleaner database connection.
+* Removed Quill from dependencies and references to it on the backend. 
+* Text-editor now has more options (blockquote, strikethrough, bullet/numbered lists).

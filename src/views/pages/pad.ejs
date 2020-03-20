@@ -59,20 +59,21 @@
                 modules: {
                     toolbar: [
                         [{ header: [1, 2, false] }],
-                        ['bold', 'italic', 'underline'],
-                        ['code-block']
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['code-block', 'blockquote'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                     ]
                 },
                 placeholder: '',
                 theme: 'snow'
             });
 
-            window.onload = function() {
+            window.addEventListener('load', function() {
                 quill.setContents(JSON.parse(document.getElementById('hidden').textContent));
                 document.getElementById('hidden').parentNode.removeChild(document.getElementById('hidden'));
-            }
+            });
 
-            document.getElementById('save').onclick = function() {  
+            document.getElementById('save').addEventListener('click', function() {  
                 if(typeof fetch === 'undefined' || typeof Promise === 'undefined') {
                     return window.location.href = '/error';
                 }
@@ -86,16 +87,17 @@
                     },
                     body: JSON.stringify({ html: c.ops, key: window.location.href.split('/').pop() })
                 })
-                    .then(d => d.json())
-                    .then(r => {
-                        document.querySelector('.modal-title').textContent = r && r.success ? 'Saved document!' : r.fail;
-                        document.querySelector('.modal').style.display = 'block';
-                    });
-            };
+                .then(function(d) { 
+                    return d.json() })
+                .then(function(r) {
+                    document.querySelector('.modal-title').textContent = r && r.success ? 'Saved document!' : r.fail;
+                    document.querySelector('.modal').style.display = 'block';
+                });
+            });
 
-            document.getElementById('closeModal').onclick = function() {
+            document.getElementById('closeModal').addEventListener('click', function() {
                 document.querySelector('.modal').style.display = 'none';
-            }
+            });
         </script>
 
         <footer>
