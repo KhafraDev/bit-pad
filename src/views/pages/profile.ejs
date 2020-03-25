@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head") %>
+    </head>
+    <header>
+        <%- include("../partials/header", { authenticated: authenticated }) %>
+    </header>
+    <body class="container">
+        <table class="table table-hover table-dark">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Pad Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% user.pads.forEach(function(pad, _, i) { %>
+                    <tr>
+                        <th scope="row"><%= user.pads.indexOf(pad) + 1 %></th>
+                        <td><%= pad.name %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        
+        <footer>
+            <%- include("../partials/footer") %>
+        </footer>
+    </body>
+</html>
+

@@ -4,7 +4,7 @@
         <%- include("../partials/head") %>
     </head>
     <header>
-        <%- include("../partials/header") %>
+        <%- include("../partials/header", { authenticated: authenticated }) %>
     </header>
     <body class="container">
         <main>
@@ -19,7 +19,25 @@
                     <button class="btn btn-outline-secondary" type="button" id="create">Create</button>
                 </div>
             </div>
-        </main>
+
+            <div class="modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Nothing to report!</h5>
+                        </div>
+                        <button id="closeModal" class="btn btn-success">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <style type="text/css">
+                #closeModal {
+                    width: 15%;
+                    height: 5%;
+                    text-align: center;
+                }
+            </style>
 
         <script type="application/javascript">
             window.addEventListener('load', function() {
@@ -27,24 +45,35 @@
                     window.location.protocol + '//' + window.location.host + '/pad/';
             });
 
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.querySelector('.modal').style.display = 'none';
+            });
+
             document.getElementById('create').addEventListener('click', function() { 
-                const value = document.getElementById('inputCreate').value;
-                if( !value.length || 
+                const name = document.getElementById('inputCreate').value;
+                if( !name.length || 
                     !('fetch' in window) ||
                     !('Promise' in window)
-                ) return window.location.href = '/error';
+                ) return window.location.href = '/';
 
-                return fetch('register', {
+                return fetch('create', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ name: value })
+                    body: JSON.stringify({ name })
                 })
                 .then(function(r) { 
-                    return r.status === 200 ? r.json() : null })
+                    return r.json();
+                })
                 .then(function(data) {
-                    return window.location.href = data && data.pad ? data.pad : '/error' });
+                    if(data.message) {
+                        document.querySelector('.modal-title').textContent = data.message;
+                        document.querySelector('.modal').style.display = 'block';
+                    } else if(data.name) {
+                        window.location.href = '/pad/' + data.name;
+                    }
+                });
             });
         </script>
 

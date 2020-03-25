@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <%- include("../partials/head") %>
+    </head>
+    <header>
+        <%- include("../partials/header", { authenticated: authenticated }) %>
+    </header>
+    <body class="container">
+		<main>
+			<form class="login" action="/login" method="POST">
+				<div class="form-group">
+				  	<label for="username">Username</label>
+				  	<input class="form-control" name="username" aria-describedby="usernameLabel">
+				  	<small id="usernameLabel" class="form-text text-muted">Usernames and passwords are case-sensitive!</small>
+				</div>
+				<div class="form-group">
+				  	<label for="password">Password</label>
+				  	<input type="password" class="form-control" name="password">
+				</div>
+				<button type="submit" class="btn btn-primary">Login</button>
+			</form>
+			<button for="login" class="btn register">Register</button>
+
+			<div class="modal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Nothing to report!</h5>
+                        </div>
+                        <button id="closeModal" class="btn btn-success">Close</button>
+                    </div>
+                </div>
+            </div>
+		</main>
+
+		<style type="text/css">
+			.register {
+				background-color: transparent;
+				font-size: 16px;
+			}
+
+			.btn-primary {
+				float: left;
+			}
+		</style>
+		
+		<script>
+			document.querySelector('.register').addEventListener('click', function() {
+				if(!('FormData' in window)) return;
+
+				if('fetch' in window && 'Promise' in window) {
+					const username = document.querySelector('*[name="username"]').value;
+					const password = document.querySelector('*[name="password"]').value;
+					if(!username.length || !password.length) {
+						return;
+					}
+
+					return fetch('/register', {
+						method: 'POST',
+						body: JSON.stringify({
+							username, password
+						}),
+						headers: {
+							'Content-Type': 'application/json'
+						}
+					}).then(function(res) {
+						return res.json()
+					}).then(function(data) {
+						if(data.message === true) {
+							document.querySelector('.modal-title').textContent = 'Created Account!'
+						} else {
+							document.querySelector('.modal-title').textContent = data.message === false 
+								? 'Account name already taken!'
+								: data.message;
+						}
+
+						return document.querySelector('.modal').style.display = 'block';
+					});
+				}
+			});
+
+			document.getElementById('closeModal').addEventListener('click', function() {
+                document.querySelector('.modal').style.display = 'none';
+            });
+		</script>
+		
+		<footer>
+            <%- include("../partials/footer") %>
+        </footer>
+    </body>
+</html>
+

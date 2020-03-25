@@ -31,3 +31,11 @@
 * Cleaner database connection.
 * Removed Quill from dependencies and references to it on the backend. 
 * Text-editor now has more options (blockquote, strikethrough, bullet/numbered lists).
+
+# v1.2.0
+* Complete rewrite.
+* Accounts. Login, register, and own pads.
+* With accounts, added in endpoints: /profile, /login, and /logout (POST only).
+* Separated functions into different files.
+* Disable browser caching of pads.
+* A lot more I am forgetting.

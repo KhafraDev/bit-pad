@@ -1,92 +1,160 @@
 const app = require('express')();
-const bodyParser = require('body-parser');
-
-const Connect = require('./src/lib/Connect');
-
+const { urlencoded, json } = require('body-parser');
 const { join } = require('path');
+
+const passport = require('./src/lib/Passport');
+const Authenticated = require('./src/lib/Authenticated'); 
+const { 
+	padExists, 
+	padCreate, 
+	padGet, 
+	padUpdate,
+	accountRegister,
+	updateOwner 
+} = require('./src/lib/Query');
 
 app.set('view engine', 'ejs');
 app.set('views', join(__dirname, 'src', 'views'));
 
-app.use(bodyParser.json({
-    limit: '5mb'
-}));
-app.use(bodyParser.urlencoded({ 
-    extended: true, 
-    limit: '5mb' 
+app.use(urlencoded({ extended: true, limit: '5mb' }));
+app.use(json({ limit: '5mb' }));
+
+app.use(require('express-session')({ 
+	secret: 'my secret... eventually', 
+	resave: false, 
+	saveUninitialized: false 
 }));
 
-app.get('/', (_, res) => res.status(200).render('pages/main'));
+app.use(passport.initialize());
+app.use(passport.session());
+
+/**
+ * Main Routes
+ */
+
+app.get('/', (req, res) => res.status(200).render('pages/main', {
+	authenticated: req.isAuthenticated()
+}));
+
+/**
+ * Login/Authentication Routes
+ */
+
+app.get('/login', (req, res) => res.status(200).render('pages/login', {
+	authenticated: req.isAuthenticated()
+}));
+  
+app.post(
+	'/login', 
+	passport.authenticate('local', { 
+		failureRedirect: '/login', 
+		successRedirect: '/profile' 
+	}), 
+	(req, res) => res.status(200).redirect('/profile', {
+		authenticated: req.isAuthenticated() 
+	})
+);
 
 app.post('/register', async (req, res) => {
-    if(typeof req.body === 'undefined' || typeof req.body.name === 'undefined') {
-        return res.status(404).send(null);
-    }
+	if(!('username' in req.body) || !('password' in req.body)) {
+		return res.status(400).send({
+			message: 'Missing username or password!'
+		});
+	} else if(
+		(req.body.username.length < 3 || req.body.username.length > 30) ||
+		(req.body.password.length < 8 || req.body.password.length > 100)
+	) {
+		return res.status(400).send({
+			message: 'Username must be between 3 and 30 characters and password must be between 8 and 100 characters.'
+		});
+	}
 
-    try {
-        const db = (await Connect()).db('pastes').collection('keys');
-
-        const result = await db.findOneAndUpdate(
-            { key: encodeURIComponent(req.body.name) },
-            { $setOnInsert: { 
-                key: encodeURIComponent(req.body.name), 
-                data: '[]'
-            } },
-            { returnOriginal: false, upsert: true }
-        ); // find existing paste of create a new one.
-
-        return res.status(200).send({ pad: '/pad/' + result.value.key });
-    } catch {
-        return res.status(400).send(null);
-    }
+	const r = await accountRegister(req.body.username, req.body.password);
+	return res.status(200).send({
+		message: !!r
+	});
+});
+  
+app.post('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/');
 });
 
-app.get('/pad/:name', async (req, res) => {
-    if(!req.params || !req.params.name || !req.params.name.length) {
-        return res.status(400).redirect('/error');
-    }
+app.get(
+	'/profile', 
+	Authenticated, 
+	(req, res) => {
+		res.status(200).render('pages/profile', { 
+			user: req.user,
+			authenticated: req.isAuthenticated() 
+		})
+	}
+);
 
-    try {
-        const db = (await Connect()).db('pastes').collection('keys');
+/**
+ * Pad methods
+ */
 
-        const result = await db.findOne({ key: encodeURIComponent(req.params.name) });
-        if(!result) return res.redirect('/error');
+app.post('/create', async (req, res) => {
+	if(!('name' in req.body)) {
+		return null;
+	}
 
-        return res.render('pages/pad', { html: JSON.parse(result.data.trim().length ? result.data : '[]') });
-    } catch {
-        return res.status(404).render('pages/error');
-    }
+	const exists = await padExists(req.body.name, req.user);
+	if(Object.prototype.toString.call(exists) === '[object Object]') {
+		return exists.message === true 
+			? res.status(200).send({
+				name: req.body.name
+			  })
+			: res.status(400).send({
+				message: exists.message
+			  });
+	} else {
+		const created = await padCreate(req.body.name, req.user);
+		if(created) {
+			res.status(201).send({
+				name: req.body.name
+			});
+			
+			return updateOwner(req.body.name, req.user);
+		} else {
+			return res.status(400).send({
+				message: 'An unknown error occured registering this pad.'
+			});
+		}
+	}
+});
+
+app.get('/pad/:name?', async (req, res) => {
+	res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+	if(!('name' in req.params) || req.params.name === undefined) {
+		return res.status(302).redirect('../');
+	}
+
+	const pad = await padGet(req.params.name, req.user);
+	if(pad === null) {
+		return res.status(302).redirect('../');
+	}
+
+	return res.status(200).render('pages/pad', {
+		authenticated: req.isAuthenticated(),
+		html: pad.data
+	})
 });
 
 app.post('/save', async (req, res) => {
-    if(typeof req.body === 'undefined' || typeof req.body.html === 'undefined' || typeof req.body.key === 'undefined')
-        return res.status(400).send({ fail: 'One or more parameters missing or null.' });
+    if(!('html' in req.body) || !('name' in req.body)) {
+		return res.status(400).send({
+			message: 'Missing one or more parameters'
+		});
+	}
 
-    try {
-        const db = (await Connect()).db('pastes').collection('keys');
-
-        const result = await db.updateOne(
-            { key: req.body.key },
-            { $set: { data: JSON.stringify(req.body.html) } }
-        );
-
-        if(!result) {
-            return res.status(400).send({ fail: 'No document found to update.' });
-        } else if(result.result.nModified === 0 && result.result.ok === 1) {
-            return res.status(400).send({ fail: 'Nothing needed to be updated!' });
-        }
-
-        return res.status(200).send({ success: true });
-    } catch(err) {
-        if(err.type === 'entity.too.large') {
-            return res.status(400).send({ fail: 'Document too large (max: 5mb).' });
-        }
-        
-        return res.status(400).send({ fail: 'An unexpected error occured!\n' + err.message });
-    }
+	const saved = await padUpdate(req.body.name, req.body.html, req.user);
+	return res.status(200).send({
+		message: saved.message === false 
+			? 'Not authenticated'
+			: saved.message
+	});
 });
-
-app.get('/error', (_, res) => res.status(302).render('pages/error'));
-app.get('*', (_, res) => res.status(302).redirect('/error'));
 
 app.listen(3000, () => console.log('Listening on port 3000!'));

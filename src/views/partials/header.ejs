@@ -1,5 +1,16 @@
 <nav class="navbar navbar-light bg-light">
-    <a class="navbar-brand" href="#">
-      <img src="https://i.imgur.com/btyW0xA.png" width="30" height="30" alt="">
-    </a>
+  <a class="navbar-brand" href="#">
+    <img src="https://i.imgur.com/btyW0xA.png" width="30" height="30" alt="">
+  </a>
+  <ul class="navbar-nav ml-auto">
+    <% if (authenticated) { %>
+      <form class="form-inline my-2 my-lg-0" action="/logout" method="POST">
+        <button class="btn btn-outline-success my-2 my-sm-0">Logout</button>
+      </form>
+    <% } else { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/login">Login</a>
+      </li>
+    <% } %>
+  </ul>
 </nav>

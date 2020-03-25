@@ -1,18 +1,34 @@
 {
   "name": "bit-pad",
-  "version": "1.1.6",
-  "description": "Etherpad replacement.",
-  "main": "index.js",
-  "dependencies": {
-    "ejs": "^3.0.1",
-    "express": "^4.17.1",
-    "mongodb": "^3.4.0"
-  },
-  "devDependencies": {},
+  "version": "1.2.0",
+  "description": "Fast, free, and opensource platform to save notes without any tracking.",
   "keywords": [
     "etherpad",
     "notepad"
   ],
-  "author": "Khafra",
-  "license": "MIT"
+  "author": "Jared Hanson",
+  "license": "MIT",
+  "homepage": "https://github.com/passport/express-4.x-local-example",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/passport/express-4.x-local-example.git"
+  },
+  "bugs": {
+    "url": "https://github.com/passport/express-4.x-local-example/issues"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect-ensure-login": "^0.1.1",
+    "ejs": "^2.6.2",
+    "express": "^4.17.1",
+    "express-session": "^1.16.1",
+    "mongodb": "^3.5.5",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0"
+  },
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
