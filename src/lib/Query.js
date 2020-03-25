@@ -3,6 +3,7 @@
  */
 const Connect = require('./Connect');
 const { ObjectId } = require('mongodb');
+const { hashSync, genSaltSync } = require('bcryptjs');
 
 /**
  * Test if a pad exists, a
@@ -15,17 +16,21 @@ const padExists = async (name, user) => {
     const options = { name };
     if(user) {
         Object.assign(options, {
-            owner: user.username
+            $or: [
+                { owner: user.username },
+                { access: { $in: [ user.username ] } }
+            ]
         });
     }
     const r = await db.findOne(options);
-
     if(!r) { // pad doesn't exist
         return false; 
     } else if(!r.owner) { // no owner on pad; anyone can access
         return { message: true };
     } else if(!user && r.owner) { // no user logged in but the pad has an owner
         return { message: 'You cannot access this pad.' };
+    } else if(r.access.indexOf(user.username) >= 0) { // user has access to pad
+        return { message: true };
     } else if(r.owner !== user.username) { // owner's name doesn't match user's name
         return { message: 'You cannot access this pad.' }
     } else if(user.username === r.owner) { // pad owner = user trying to access it
@@ -51,6 +56,7 @@ const padCreate = async (name, user) => {
 
     const r = await db.insertOne({
         ...options,
+        access: [],
         data: '[]'
     });
 
@@ -71,15 +77,22 @@ const padGet = async (name, user) => {
     const options = { name };
     if(user) {
         Object.assign(options, {
-            owner: user.username
+            $or: [
+                { owner: user.username },
+                { access: { $in: [ user.username ] } }
+            ]
         });
     }
 
     const r = await db.findOne(options);
     if(!r) { // pad doesn't exist (?)
         return null;
+    } else if(!r.owner) { 
+        return r;
     } else if(!user && r.owner) { // pad has an owner, user isn't logged in
         return null;
+    } else if(r.access.indexOf(user.username) >= 0) { // user has access
+        return r;
     } else if(r.owner !== user.username) { // user is not the pad owner
         return null;
     }
@@ -116,12 +129,36 @@ const padUpdate = async (name, html, user) => {
  * @returns {Promise<boolean>}
  */
 const updateOwner = async (name, user) => {
-    if(!user) return;
+    if(!user) return null;
     
     const db = (await Connect()).db('bitpad').collection('accounts');
     const r = await db.updateOne(
         { _id: new ObjectId(user._id) },
         { $push: { pads: { name: name } } }
+    );
+
+    return r.result.ok === 1;
+}
+
+/**
+ * Give a user access to a pad.
+ * @param {string} name Pad name
+ * @param {string} newOwner Username to give access to
+ * @param {any} user User object 
+ * @returns {Promise<boolean>}
+ */
+const addOwner = async (name, newOwner, user) => {
+    if(!newOwner || !name || !user) return null;
+
+    const db = (await Connect()).db('bitpad').collection('pads');
+    const pad = await padGet(name, user);
+    if(!pad) { // checks owner status
+        return null;
+    }
+
+    const r = await db.updateOne(
+        { 'name': name },
+        { $push: { access: newOwner } }    
     );
 
     return r.result.ok === 1;
@@ -150,9 +187,10 @@ const accountRegister = async (username, password) => {
     }
 
     const db = (await Connect()).db('bitpad').collection('accounts');
+    const hash = hashSync(password, genSaltSync(10));
     const r = await db.insertOne({
         username,
-        password,
+        password: hash,
         pads: []
     });
 
@@ -165,5 +203,6 @@ module.exports = {
     padGet,
     padUpdate,
     accountRegister,
-    updateOwner
+    updateOwner,
+    addOwner
 }

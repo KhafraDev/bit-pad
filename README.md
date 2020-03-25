@@ -1,12 +1,11 @@
 # bit-pad
  Fast, free, and opensource platform to save notes without any tracking.
 
-# v1.2.0
-* Do NOT use.
-    * Passwords stored in plaintext.
-    * No way to add users to a pad.
-    * Possible re-re-structuring of database(s) in the future to accomodate for new features.
-    * Secret key for express-session is not very secret.
+# Privacy
+* Passwords are hashed before being inserted into the database using bcryptjs.
+* No tracking done client or server-side (I cannot verify this with Bootstrap 4 or Quilljs).
+* Back and front end are opensource; these claims can be verified.
+* Be aware: your password is sent in plaintext to the server, but it is not read (in the unmodified repo). A malicious host **could** log or steal passwords. I could add in more JS client-side and hash the password, but it would be more overhead for the user. Plus, only people with something to hide would provide that much privacy.
 
 # Installation
 1. Download or clone the repo to a folder of your choice.
@@ -32,6 +31,7 @@ https://www.khafra.bid/ (v1.1.6)
     * POST /logout
     * POST /create
     * POST /save
+    * POST /add
 
 # Updating 
 * A list of major updates that may occur.

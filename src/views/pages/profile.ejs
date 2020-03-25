@@ -12,6 +12,7 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Pad Name</th>
+                    <th scope="col">Add User</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,10 +20,35 @@
                     <tr>
                         <th scope="row"><%= user.pads.indexOf(pad) + 1 %></th>
                         <td><%= pad.name %></td>
+                        <td>
+                            <div class="input-group">
+                                <form class="add">
+                                    <input type="text" class="form-control" name="addUser" />
+                                    <input type="hidden" name="padName" value=<%= pad.name %>>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 <% }) %>
             </tbody>
         </table>
+
+        <style type="text/css">
+            .form-control {
+                width: 75%;
+            }
+        </style>
+
+        <script>
+            document.querySelector('.add').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const form = new FormData(document.querySelector('.add'));
+                return fetch('add', {
+                    method: 'POST',
+                    body: new URLSearchParams(form)
+                });
+            });
+        </script>
         
         <footer>
             <%- include("../partials/footer") %>

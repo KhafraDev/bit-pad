@@ -34,8 +34,11 @@
 
 # v1.2.0
 * Complete rewrite.
-* Accounts. Login, register, and own pads.
-* With accounts, added in endpoints: /profile, /login, and /logout (POST only).
+* Added accounts: login, register, and own pads that only you can access.
 * Separated functions into different files.
 * Disable browser caching of pads.
 * A lot more I am forgetting.
+
+# v1.2.1
+* Add users to pads (/profile).
+* Password is hashed before being inserted into the database.

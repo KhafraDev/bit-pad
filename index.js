@@ -10,7 +10,8 @@ const {
 	padGet, 
 	padUpdate,
 	accountRegister,
-	updateOwner 
+	updateOwner,
+	addOwner
 } = require('./src/lib/Query');
 
 app.set('view engine', 'ejs');
@@ -154,6 +155,21 @@ app.post('/save', async (req, res) => {
 		message: saved.message === false 
 			? 'Not authenticated'
 			: saved.message
+	});
+});
+
+app.post('/add', async (req, res) => {
+	if(!('addUser' in req.body)) {
+		return res.status(400).send({ message: 'No user to add!' });
+	} else if(!('padName' in req.body)) {
+		return res.status(400).send({ message: 'No pad name given!' })
+	}else if(req.body.addUser.length < 3 || req.body.addUser.length > 30) {
+		return res.status(400).send({ message: 'Invalid username!' });
+	}
+
+	const added = await addOwner(req.body.padName, req.body.addUser, req.user);
+	return res.status(added ? 200 : 400).send({
+		message: added ? 'Added user to pad!' : 'Did not add user to pad!'
 	});
 });
 

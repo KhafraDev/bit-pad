@@ -1,6 +1,8 @@
 const passport = require('passport');
 const { Strategy } = require('passport-local');
 const { ObjectId } = require('mongodb');
+const { compareSync } = require('bcryptjs');
+
 const Connect = require('./Connect');
 
 passport.use(new Strategy(async (username, password, done) => {
@@ -10,8 +12,8 @@ passport.use(new Strategy(async (username, password, done) => {
 			username: username
 		});
 
-		if(!user) return done(null, false);
-		if(user.password !== password) return done(null, false);
+		if(!user) return done(null, false); // user not found in db
+		if(!compareSync(password, user.password)) return done(null, false); // password is incorrect
 
 		return done(null, user);
 	} catch(err) {
