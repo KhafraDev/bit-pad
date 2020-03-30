@@ -42,3 +42,11 @@
 # v1.2.1
 * Add users to pads (/profile).
 * Password is hashed before being inserted into the database.
+
+# v1.2.2
+* Fixed an issue where adding users to pads did not work.
+* Small changes to HTML to be "up to standard". Future releases will contain more about this.
+* Added in a hotkey. Press CTRL+S to save pads automatically, does not work on old browsers.
+* Nuke browser caching once and for all: this fixes users having access to pads after they logged out and users not being able to access pads.
+* Greatly improved speeds, most likely related to browser caching.
+* Clear ``connect.sid`` cookie on logout.

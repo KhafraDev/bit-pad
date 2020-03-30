@@ -16,9 +16,18 @@ const {
 
 app.set('view engine', 'ejs');
 app.set('views', join(__dirname, 'src', 'views'));
+app.set('etag', false);
+app.set('x-powered-by', false);
+app.set('view cache', false);
 
 app.use(urlencoded({ extended: true, limit: '5mb' }));
 app.use(json({ limit: '5mb' }));
+app.use((req, res, next) => {
+	res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private, max-age=0');
+	res.set('Pragma', 'no-cache');
+	res.set('Expires', '0'); // should be ignored because of max-age
+	return next();
+})
 
 app.use(require('express-session')({ 
 	secret: 'my secret... eventually', 
@@ -77,19 +86,18 @@ app.post('/register', async (req, res) => {
 });
   
 app.post('/logout', (req, res) => {
-    req.logout();
+	req.logout();
+	res.clearCookie('connect.sid');
     res.redirect('/');
 });
 
 app.get(
 	'/profile', 
 	Authenticated, 
-	(req, res) => {
-		res.status(200).render('pages/profile', { 
+	(req, res) => res.status(200).render('pages/profile', { 
 			user: req.user,
 			authenticated: req.isAuthenticated() 
-		})
-	}
+	})
 );
 
 /**
@@ -127,7 +135,6 @@ app.post('/create', async (req, res) => {
 });
 
 app.get('/pad/:name?', async (req, res) => {
-	res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
 	if(!('name' in req.params) || req.params.name === undefined) {
 		return res.status(302).redirect('../');
 	}

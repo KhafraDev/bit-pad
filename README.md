@@ -4,7 +4,7 @@
 # Privacy
 * Passwords are hashed before being inserted into the database using bcryptjs.
 * No tracking done client or server-side (I cannot verify this with Bootstrap 4 or Quilljs).
-* Back and front end are opensource; these claims can be verified.
+* Back and front end are opensource.
 * Be aware: your password is sent in plaintext to the server, but it is not read (in the unmodified repo). A malicious host **could** log or steal passwords. I could add in more JS client-side and hash the password, but it would be more overhead for the user. Plus, only people with something to hide would provide that much privacy.
 
 # Installation
@@ -18,7 +18,7 @@
 8. ``pm2 start index.js --name bitpad``.
 
 # Demo
-https://www.khafra.bid/ (v1.2.1)
+https://www.khafra.bid/ (v1.2.2)
 
 # API
 * The API was built to be simple to use and easy to figure out. These docs document what could easily be found in production and within the source.
@@ -38,3 +38,4 @@ https://www.khafra.bid/ (v1.2.1)
 
 ## v1.1.6 -> 1.2.0
 * Database restructured.
+* CLEAR BROWSER CACHE IF YOU CANNOT ACCESS A PAD.

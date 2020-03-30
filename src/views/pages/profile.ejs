@@ -12,7 +12,6 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Pad Name</th>
-                    <th scope="col">Add User</th>
                 </tr>
             </thead>
             <tbody>
@@ -20,17 +19,26 @@
                     <tr>
                         <th scope="row"><%= user.pads.indexOf(pad) + 1 %></th>
                         <td><%= pad.name %></td>
-                        <td>
-                            <div class="input-group">
-                                <form class="add">
-                                    <input type="text" class="form-control" name="addUser" />
-                                    <input type="hidden" name="padName" value=<%= pad.name %>>
-                                </form>
-                            </div>
-                        </td>
                     </tr>
                 <% }) %>
             </tbody>
+            <form class="add">
+                <div class="form-row align-items-center">
+                    <div class="col-auto">
+                        <label class="sr-only" for="inlineFormInput">Name</label>
+                        <input type="text" class="form-control mb-2" id="inlineFormInput" placeholder="Username" name="addUser">
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="inlineFormInputGroup">Username</label>
+                        <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Pad Name" name="padName">
+                    </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                    </div>
+                </div>
+            </form>
         </table>
 
         <style type="text/css">
@@ -55,4 +63,3 @@
         </footer>
     </body>
 </html>
-
