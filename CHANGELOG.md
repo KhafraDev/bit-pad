@@ -50,3 +50,9 @@
 * Nuke browser caching once and for all: this fixes users having access to pads after they logged out and users not being able to access pads.
 * Greatly improved speeds, most likely related to browser caching.
 * Clear ``connect.sid`` cookie on logout.
+
+# v1.2.3
+* Fixed crash when saving a pad that was not modified.
+* Removed all JavaScript and CSS from /profile. When adding a user to a pad the page will be refreshed.
+* Add static resources.
+* Add XMLHttpRequest support if the browser does not support fetch or Promises.

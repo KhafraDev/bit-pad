@@ -18,7 +18,7 @@
 8. ``pm2 start index.js --name bitpad``.
 
 # Demo
-https://www.khafra.bid/ (v1.2.2)
+https://www.khafra.bid/ (v1.2.3)
 
 # API
 * The API was built to be simple to use and easy to figure out. These docs document what could easily be found in production and within the source.

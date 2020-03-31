@@ -22,16 +22,16 @@
                     </tr>
                 <% }) %>
             </tbody>
-            <form class="add">
+            <form class="add" action="add" method="POST">
                 <div class="form-row align-items-center">
                     <div class="col-auto">
-                        <label class="sr-only" for="inlineFormInput">Name</label>
-                        <input type="text" class="form-control mb-2" id="inlineFormInput" placeholder="Username" name="addUser">
+                        <label class="sr-only" for="username">Name</label>
+                        <input type="text" class="form-control mb-2" id="username" placeholder="Username" name="addUser">
                     </div>
                     <div class="col-auto">
-                        <label class="sr-only" for="inlineFormInputGroup">Username</label>
+                        <label class="sr-only" for="pad">Username</label>
                         <div class="input-group mb-2">
-                        <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="Pad Name" name="padName">
+                        <input type="text" class="form-control" id="pad" placeholder="Pad Name" name="padName">
                     </div>
                     </div>
                     <div class="col-auto">
@@ -40,23 +40,6 @@
                 </div>
             </form>
         </table>
-
-        <style type="text/css">
-            .form-control {
-                width: 75%;
-            }
-        </style>
-
-        <script>
-            document.querySelector('.add').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const form = new FormData(document.querySelector('.add'));
-                return fetch('add', {
-                    method: 'POST',
-                    body: new URLSearchParams(form)
-                });
-            });
-        </script>
         
         <footer>
             <%- include("../partials/footer") %>

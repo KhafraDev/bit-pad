@@ -1,4 +1,5 @@
-const app = require('express')();
+const express = require('express');
+const app = express();
 const { urlencoded, json } = require('body-parser');
 const { join } = require('path');
 
@@ -22,13 +23,13 @@ app.set('view cache', false);
 
 app.use(urlencoded({ extended: true, limit: '5mb' }));
 app.use(json({ limit: '5mb' }));
+app.use(express.static('src/public'));
 app.use((req, res, next) => {
 	res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private, max-age=0');
 	res.set('Pragma', 'no-cache');
 	res.set('Expires', '0'); // should be ignored because of max-age
 	return next();
-})
-
+});
 app.use(require('express-session')({ 
 	secret: 'my secret... eventually', 
 	resave: false, 
@@ -106,7 +107,7 @@ app.get(
 
 app.post('/create', async (req, res) => {
 	if(!('name' in req.body)) {
-		return null;
+		return res.status(400).send({ message: 'Bad request.' })
 	}
 
 	const exists = await padExists(req.body.name, req.user);
@@ -174,10 +175,8 @@ app.post('/add', async (req, res) => {
 		return res.status(400).send({ message: 'Invalid username!' });
 	}
 
-	const added = await addOwner(req.body.padName, req.body.addUser, req.user);
-	return res.status(added ? 200 : 400).send({
-		message: added ? 'Added user to pad!' : 'Did not add user to pad!'
-	});
+	await addOwner(req.body.padName, req.body.addUser, req.user);
+	return res.status(302).redirect('/profile');
 });
 
 app.listen(3000, () => console.log('Listening on port 3000!'));

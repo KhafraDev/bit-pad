@@ -115,7 +115,7 @@ const padUpdate = async (name, html, user) => {
 
     if(!r) { // document not found
         return { message: 'No document found to update.' };
-    } else if(r.result.nModified === 0 && result.result.ok === 1) { // not updated; nothing changed
+    } else if(r.result.nModified === 0 && r.result.ok === 1) { // not updated; nothing changed
         return { message: 'Nothing needed to be updated!' };
     }
 
