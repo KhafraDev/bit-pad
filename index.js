@@ -21,16 +21,6 @@ app.prepare().then(() => {
 		return app.render(req, res, '/', req.query);
 	});
 
-	/* Create a pad, or return with an existing one. */
-	server.post('/create', async (req, res) => {
-		if(!('name' in req.body)) {
-			return res.status(400).send(null);
-		}
-		
-		const pad = await Create(encodeURIComponent(req.body.name.toLowerCase()));
-		return res.status(200).send(pad.value);
-	});
-
 	/* Get a pad's contents, or create a new one. */
 	server.post(/create|get/i, async (req, res) => {
 		if(!('name' in req.body)) {
