@@ -1,35 +1,38 @@
 {
   "name": "bit-pad",
-  "version": "1.2.3",
-  "description": "Fast, free, and opensource platform to save notes without any tracking.",
-  "keywords": [
-    "etherpad",
-    "notepad"
-  ],
-  "author": "Jared Hanson",
-  "license": "MIT",
-  "homepage": "https://github.com/passport/express-4.x-local-example",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/passport/express-4.x-local-example.git"
-  },
-  "bugs": {
-    "url": "https://github.com/passport/express-4.x-local-example/issues"
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
-    "connect-ensure-login": "^0.1.1",
-    "ejs": "^2.6.2",
+    "next": "9.3.4",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
     "express": "^4.17.1",
-    "express-session": "^1.16.1",
-    "mongodb": "^3.5.5",
-    "passport": "^0.4.0",
-    "passport-local": "^1.0.0"
+    "mongodb": "^3.5.5"
   },
+  "description": "Fast, free, and opensource platform to save notes without any tracking.",
   "main": "index.js",
   "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khafradev/bit-pad.git"
+  },
+  "keywords": [
+    "notes",
+    "note",
+    "notepad",
+    "etherpad",
+    "pastebin",
+    "hastebin"
+  ],
+  "author": "Khafra",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/khafradev/bit-pad/issues"
+  },
+  "homepage": "https://github.com/khafradev/bit-pad#readme"
 }
